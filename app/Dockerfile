@@ -1,14 +1,24 @@
-# Use uma Imagem Official do Python
-FROM python:3
+# Usa uma imagem Python reduzida para minimizar vulnerabilidades
+FROM python:3.10-slim
 
-# Definindo o diretório onde a aplicação será armazenada
+# Definir diretório de trabalho
 WORKDIR /app
 
-# Copiar os arquivos da pasta local para dentro do container
+# Atualiza pacotes do sistema e remove arquivos desnecessários
+RUN apt-get update && apt-get upgrade -y && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Copia os arquivos da aplicação
 COPY . /app
 
-# Instalar as dependências de Python de acordo com o que foi desenvolvido na aplicação e que está declarado no arquivo requirements.txt.
-RUN pip install --trusted-host pypi.python.org -r requirements.txt
+# Instala dependências de forma otimizada
+RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir -r requirements.txt
 
-# Garante que será iniciado a aplicação.
-CMD ["gunicorn", "app:app"]
+# Criar usuário não-root para segurança
+RUN useradd -m appuser
+USER appuser
+
+# Expor a porta correta do container
+EXPOSE 8000
+
+# Executar a aplicação usando Gunicorn
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "app:app"]
