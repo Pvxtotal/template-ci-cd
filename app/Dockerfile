@@ -11,7 +11,7 @@ RUN apt-get update && apt-get upgrade -y && apt-get clean && rm -rf /var/lib/apt
 COPY . /app
 
 # Instala dependências de forma otimizada
-RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --upgrade pip setuptools && pip install --no-cache-dir -r requirements.txt
 
 # Criar usuário não-root para segurança
 RUN useradd -m appuser
